@@ -206,7 +206,6 @@ class LinkedList:
     ### reverse ###
     def reverse(self):
         """Return a copy of the list with all elements in reverse order.
-
         E.g., for [1,2,3] you shoudl return [3,2,1].
         """
         ### BEGIN SOLUTION
