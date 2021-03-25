@@ -51,6 +51,22 @@ def check_delimiters(expr):
     delim_closers = '})]>'
 
     ### BEGIN SOLUTION
+    stack = Stack()
+    for i in expr:
+        if (i == " "):
+            continue
+        elif (i in delim_openers):
+            stack.push(i)
+        elif (i in delim_closers):
+            try:
+                x = stack.pop()
+                idxX = delim_openers.index(x)
+                idxI = delim_closers.index(i)
+                if (idxX != idxI):
+                    return False
+            except:
+                return False
+    return stack.empty()
     ### END SOLUTION
 
 ################################################################################
@@ -121,6 +137,33 @@ def infix_to_postfix(expr):
     postfix = []
     toks = expr.split()
     ### BEGIN SOLUTION
+    stack = Stack()
+    i = 0
+    while (i < len(toks)):
+        if (toks[i].isdigit()):
+            postfix.append(toks[i])
+        elif (stack.empty() or stack.peek() == "("):
+            stack.push(toks[i])
+        elif (toks[i] == "("):
+            stack.push(toks[i])
+        elif (toks[i] == ")"):
+            while True:
+                k = stack.pop()
+                if (k == "("):
+                    break
+                postfix.append(k)
+        elif (prec[toks[i]] > prec[stack.peek()]):
+            stack.push(toks[i])
+        elif (prec[toks[i]] == prec[stack.peek()]):
+            postfix.append(stack.pop())
+            stack.push(toks[i])
+        else:
+            while (stack.peek() != None):
+                postfix.append(stack.pop())
+            i -= 1
+        i += 1
+    while (stack.peek() != None):
+        postfix.append(stack.pop())
     ### END SOLUTION
     return ' '.join(postfix)
 
@@ -166,19 +209,67 @@ class Queue:
 
     def enqueue(self, val):
         ### BEGIN SOLUTION
+        if (self.head == self.tail and self.data[self.head] == None):
+            self.tail = 0
+            self.head = 0
+            self.data[self.head] = val
+        elif (self.head == len(self.data) - 1):
+            if (self.data[0] != None):
+                raise RuntimeError
+            self.head = 0
+            self.data[self.head] = val
+        elif (self.data[self.head + 1] != None):
+            raise RuntimeError
+        else:
+            self.data[self.head + 1] = val
+            self.head = self.head + 1
         ### END SOLUTION
 
     def dequeue(self):
         ### BEGIN SOLUTION
+        if (self.head == self.tail and self.data[self.head] == None):
+            raise RuntimeError
+        elif (self.tail == self.head):
+            y = self.data[self.tail]
+            self.data[self.tail] = None
+        elif (self.tail == len(self.data) - 1):
+            y = self.data[self.tail]
+            self.data[self.tail] = None
+            self.tail = 0
+        else:
+            y = self.data[self.tail]
+            self.data[self.tail] = None
+            self.tail += 1
+        return y
         ### END SOLUTION
 
     def resize(self, newsize):
         assert(len(self.data) < newsize)
         ### BEGIN SOLUTION
+        a = 0
+        newData = [None] * newsize
+        idx = self.head
+        vals = []
+        for i in range(newsize):
+            try:
+                vals.append(self.dequeue())
+            except:
+                a = i - 1
+                break
+        for i in range(len(vals)):
+            newData[i] = vals[i]
+        self.data = newData
+        self.head = a
+        self.tail = 0
         ### END SOLUTION
 
     def empty(self):
         ### BEGIN SOLUTION
+        if (self.head == self.tail and self.data[self.head] == None):
+            self.head = -1
+            self.tail = -1
+            return True
+        return False
         ### END SOLUTION
 
     def __bool__(self):
@@ -194,6 +285,20 @@ class Queue:
 
     def __iter__(self):
         ### BEGIN SOLUTION
+        newData = [None] * len(self.data)
+        idx = self.head
+        vals = []
+        for i in range(len(self.data)):
+            try:
+                vals.append(self.dequeue())
+            except:
+                break
+        for i in range(len(vals)):
+            self.enqueue(vals[i])
+            newData[i] = vals[i]
+
+        it = newData.__iter__()
+        return it
         ### END SOLUTION
 
 ################################################################################
